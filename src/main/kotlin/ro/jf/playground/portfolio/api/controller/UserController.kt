@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
-import ro.jf.playground.portfolio.api.transfer.RepositoriesResponse
+import ro.jf.playground.portfolio.api.transfer.BranchTO
+import ro.jf.playground.portfolio.api.transfer.RepositoriesTO
+import ro.jf.playground.portfolio.api.transfer.RepositoryTO
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -15,6 +17,21 @@ class UserController {
 
     @GetMapping("/{username}/repositories")
     @ResponseStatus(HttpStatus.OK)
-    fun getUserRepositories(@PathVariable username: String): Mono<RepositoriesResponse> =
-        Mono.just(RepositoriesResponse(listOf("repo-1", "repo-2")))
+    fun getUserRepositories(@PathVariable username: String): Mono<RepositoriesTO> =
+        Mono.just(
+            RepositoriesTO(
+                repositories = listOf(
+                    RepositoryTO(
+                        name = "repo-1",
+                        ownerLogin = "owner",
+                        branches = listOf(
+                            BranchTO(
+                                name = "main",
+                                lastCommitSha = "abcdef"
+                            )
+                        )
+                    )
+                )
+            )
+        )
 }
