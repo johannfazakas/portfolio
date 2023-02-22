@@ -11,5 +11,13 @@ Service to check the GitHub repositories by user
 
 ## Test
 
-### Unit tests
+### Automatic tests
+
+Run both unit & integration tests:  
+`./gradlew clean check`
+
+Run unit tests:  
 `./gradlew clean test`
+
+Run integration tests:  
+`./gradlew clean integrationTest`
