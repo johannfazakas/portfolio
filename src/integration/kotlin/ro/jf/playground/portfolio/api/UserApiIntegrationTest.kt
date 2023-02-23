@@ -1,10 +1,13 @@
 package ro.jf.playground.portfolio.api
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
+import ro.jf.playground.portfolio.api.transfer.ErrorTO
 import ro.jf.playground.portfolio.api.transfer.RepositoriesTO
 
 
@@ -14,18 +17,37 @@ class UserApiIntegrationTest {
     private lateinit var webClient: WebTestClient
 
     @Test
-    fun `should return user repositories when username exists`() {
+    fun `should return user repositories when getting user repositoriess`() {
         val username = "test-user"
 
         val exchange = webClient.get()
             .uri("/api/v1/users/$username/repositories")
+            .accept(MediaType.APPLICATION_JSON)
             .exchange()
 
         exchange
             .expectStatus().isOk
             .expectBody(RepositoriesTO::class.java)
             .value {
-                assertEquals(1, it.repositories.size)
+                assertThat(it.repositories).hasSize(1)
+            }
+    }
+
+    @Test
+    fun `should return error when getting user repositories and requesting xml response`() {
+        val username = "test-user"
+
+        val exchange = webClient.get()
+            .uri("/api/v1/users/$username/repositories")
+            .accept(MediaType.APPLICATION_XML)
+            .exchange()
+
+        exchange
+            .expectStatus().isEqualTo(HttpStatus.NOT_ACCEPTABLE)
+            .expectBody(ErrorTO::class.java)
+            .value {
+                assertThat(it.status).isEqualTo(406)
+                assertThat(it.message).isNotEmpty()
             }
     }
 }

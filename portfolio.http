@@ -1,3 +1,7 @@
 ### Get user repositories acepting json
 GET {{host}}:{{port}}/api/v1/users/{{username}}/repositories
 Accept: application/json
+
+### Get user repositories acepting xml
+GET {{host}}:{{port}}/api/v1/users/{{username}}/repositories
+Accept: application/xml
