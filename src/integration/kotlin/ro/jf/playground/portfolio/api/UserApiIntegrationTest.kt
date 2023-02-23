@@ -30,6 +30,11 @@ class UserApiIntegrationTest {
             .expectBody(RepositoriesTO::class.java)
             .value {
                 assertThat(it.repositories).hasSize(1)
+                assertThat(it.repositories[0].name).isEqualTo("my-repo")
+                assertThat(it.repositories[0].owner.login).isEqualTo("test-user")
+                assertThat(it.repositories[0].branches).hasSize(2)
+                assertThat(it.repositories[0].branches[0].name).isEqualTo("master")
+                assertThat(it.repositories[0].branches[0].lastCommit.sha).isEqualTo("1a2b3c")
             }
     }
 
