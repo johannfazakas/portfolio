@@ -17,14 +17,15 @@ private val logger = KotlinLogging.logger { }
 @RestController
 @RequestMapping("/api/v1/users")
 class UserController(
-    val userRepositoryService: UserRepositoryService
+    private val userRepositoryService: UserRepositoryService
 ) {
     @GetMapping("/{username}/repositories")
     @ResponseStatus(HttpStatus.OK)
     fun getUserRepositories(@PathVariable username: String): Mono<RepositoriesTO> {
-        logger.info("Get user repositories >> username = $username.")
+        logger.info("Get user repositories by username $username.")
         return userRepositoryService.getUserRepositories(username)
             .collectList()
             .map { RepositoriesTO(it.map(::RepositoryTO)) }
+            .doOnNext { logger.debug { "Retrieving repositories for username $username: $it" } }
     }
 }

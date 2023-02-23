@@ -73,4 +73,5 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
 }

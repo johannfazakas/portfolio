@@ -1,7 +1,11 @@
 ### Get user repositories acepting json
-GET {{host}}:{{port}}/api/v1/users/{{username}}/repositories
+GET {{host}}:{{port}}/api/v1/users/{{validUsername}}/repositories
 Accept: application/json
 
 ### Get user repositories acepting xml
-GET {{host}}:{{port}}/api/v1/users/{{username}}/repositories
+GET {{host}}:{{port}}/api/v1/users/{{validUsername}}/repositories
+Accept: application/xml
+
+### Get not existing user repositories
+GET {{host}}:{{port}}/api/v1/users/{{notExistingUsername}}/repositories
 Accept: application/xml
