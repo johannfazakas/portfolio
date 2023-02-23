@@ -21,20 +21,14 @@ import ro.jf.playground.portfolio.infrastructure.github.transfer.GithubRepositor
 
 private val logger = KotlinLogging.logger { }
 
-private const val GITHUB_JSON = "application/vnd.github+json"
-private const val GITHUB_API_VERSION_KEY = "X-GitHub-Api-Version"
-
 @Component
 class GithubUserRepositoryAdapter(
     private val githubApiWebClient: WebClient,
-    @Value("\${githubApi.version}") private val githubApiVersion: String,
 ) : UserRepositoryProvider {
     override fun getUserRepositories(username: String): Flux<Repository> {
         logger.debug("Get repositories by username $username.")
         return githubApiWebClient.get()
             .uri("users/$username/repos")
-            .header(ACCEPT, GITHUB_JSON)
-            .header(GITHUB_API_VERSION_KEY, githubApiVersion)
             .retrieve()
             .onStatus({ it.isError }) {
                 it.handleError { code: HttpStatusCode, response ->
@@ -52,8 +46,6 @@ class GithubUserRepositoryAdapter(
         logger.debug("Get branches by username $username and repository name $repositoryName.")
         return githubApiWebClient.get()
             .uri("repos/$username/$repositoryName/branches")
-            .header(ACCEPT, GITHUB_JSON)
-            .header(GITHUB_API_VERSION_KEY, githubApiVersion)
             .retrieve()
             .onStatus({ it.isError }) { it.handleError { _, response -> ProviderException(response) } }
             .bodyToFlux(GithubBranch::class.java)
