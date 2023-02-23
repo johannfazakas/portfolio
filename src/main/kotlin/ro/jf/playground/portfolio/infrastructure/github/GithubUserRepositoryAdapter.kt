@@ -1,59 +1,67 @@
 package ro.jf.playground.portfolio.infrastructure.github
 
+import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders.ACCEPT
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.ClientResponse
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Flux
-import reactor.kotlin.core.publisher.toFlux
+import reactor.core.publisher.Mono
+import ro.jf.playground.portfolio.domain.error.ProviderException
 import ro.jf.playground.portfolio.domain.error.UserNotFoundException
 import ro.jf.playground.portfolio.domain.model.Branch
-import ro.jf.playground.portfolio.domain.model.Commit
-import ro.jf.playground.portfolio.domain.model.Owner
 import ro.jf.playground.portfolio.domain.model.Repository
 import ro.jf.playground.portfolio.domain.service.UserRepositoryProvider
+import ro.jf.playground.portfolio.infrastructure.github.transfer.GithubBranch
+import ro.jf.playground.portfolio.infrastructure.github.transfer.GithubRepository
+
+private val logger = KotlinLogging.logger { }
+
+private const val GITHUB_JSON = "application/vnd.github+json"
+private const val GITHUB_API_VERSION_KEY = "X-GitHub-Api-Version"
 
 @Component
-class GithubUserRepositoryAdapter : UserRepositoryProvider {
+class GithubUserRepositoryAdapter(
+    private val githubApiWebClient: WebClient,
+    @Value("\${githubApi.version}") private val githubApiVersion: String,
+) : UserRepositoryProvider {
+    override fun getUserRepositories(username: String): Flux<Repository> {
+        logger.debug("Get repositories by username $username.")
+        return githubApiWebClient.get()
+            .uri("users/$username/repos")
+            .header(ACCEPT, GITHUB_JSON)
+            .header(GITHUB_API_VERSION_KEY, githubApiVersion)
+            .retrieve()
+            .onStatus({ it.isError }) {
+                it.handleError { code: HttpStatusCode, response ->
+                    when (code) {
+                        HttpStatus.NOT_FOUND -> UserNotFoundException(username)
+                        else -> ProviderException(response)
+                    }
+                }
+            }
+            .bodyToFlux(GithubRepository::class.java)
+            .map(GithubRepository::toModel)
+    }
 
-    private val usersMap = mapOf(
-        "johannfazakas" to listOf(
-            Repository(
-                id = 11,
-                name = "my-repo",
-                owner = Owner(
-                    id = 21,
-                    login = "test-user"
-                ),
-                fork = false
-            )
-        ),
-        "test-user" to listOf(
-            Repository(
-                id = 11,
-                name = "my-repo",
-                owner = Owner(
-                    id = 21,
-                    login = "test-user"
-                ),
-                fork = false
-            )
-        )
-    )
+    override fun getUserRepositoryBranches(username: String, repositoryName: String): Flux<Branch> {
+        logger.debug("Get branches by username $username and repository name $repositoryName.")
+        return githubApiWebClient.get()
+            .uri("repos/$username/$repositoryName/branches")
+            .header(ACCEPT, GITHUB_JSON)
+            .header(GITHUB_API_VERSION_KEY, githubApiVersion)
+            .retrieve()
+            .onStatus({ it.isError }) { it.handleError { _, response -> ProviderException(response) } }
+            .bodyToFlux(GithubBranch::class.java)
+            .map(GithubBranch::toModel)
+    }
 
-    private val branchesMap = mapOf(
-        "my-repo" to listOf(
-            Branch(
-                name = "master",
-                commit = Commit(sha = "1a2b3c")
-            ),
-            Branch(
-                name = "feature-123",
-                commit = Commit(sha = "4d5e6f")
-            ),
-        )
-    )
-
-    override fun getUserRepositories(username: String): Flux<Repository> =
-        usersMap[username]?.toFlux() ?: throw UserNotFoundException(username)
-
-    override fun getUserRepositoryBranches(username: String, repositoryName: String): Flux<Branch> =
-        branchesMap[repositoryName]?.toFlux() ?: Flux.empty()
+    private fun ClientResponse.handleError(mapper: (HttpStatusCode, String) -> Throwable): Mono<Throwable> =
+        bodyToMono<String>()
+            .defaultIfEmpty("Empty body")
+            .map { response -> mapper(this.statusCode(), response) }
 }

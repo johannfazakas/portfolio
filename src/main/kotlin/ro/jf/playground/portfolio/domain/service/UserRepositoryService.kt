@@ -13,7 +13,7 @@ class UserRepositoryService(
     private val userRepositoryProvider: UserRepositoryProvider
 ) {
     fun getUserRepositories(username: String): Flux<RepositoryWithBranches> {
-        logger.debug("Get user repositories by username $username.")
+        logger.debug("Get repositories by username $username.")
         return userRepositoryProvider.getUserRepositories(username)
             .filter { !it.fork }
             .flatMap { repository -> includeBranchesOnRepository(username, repository) }

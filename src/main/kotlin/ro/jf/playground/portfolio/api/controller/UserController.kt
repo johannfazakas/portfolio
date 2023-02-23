@@ -22,7 +22,7 @@ class UserController(
     @GetMapping("/{username}/repositories")
     @ResponseStatus(HttpStatus.OK)
     fun getUserRepositories(@PathVariable username: String): Mono<RepositoriesTO> {
-        logger.info("Get user repositories by username $username.")
+        logger.info("Get repositories by username $username.")
         return userRepositoryService.getUserRepositories(username)
             .collectList()
             .map { RepositoriesTO(it.map(::RepositoryTO)) }

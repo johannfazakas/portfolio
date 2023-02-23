@@ -1,0 +1,5 @@
+githubApi:
+  baseUrl: http://${mockServer.host}:${mockServer.port}
+mockServer:
+  host: localhost
+  port: 8135

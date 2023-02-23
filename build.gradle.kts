@@ -41,6 +41,9 @@ tasks {
             jvmTarget = "17"
         }
     }
+    withType<Copy> {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
     register("bootRunLocal") {
         group = "application"
         description = "Runs the service with the local profile"
@@ -74,4 +77,5 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.assertj:assertj-core:3.24.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    testImplementation("com.github.tomakehurst:wiremock:3.0.0-beta-2")
 }

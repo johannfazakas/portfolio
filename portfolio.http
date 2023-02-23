@@ -8,4 +8,4 @@ Accept: application/xml
 
 ### Get not existing user repositories
 GET {{host}}:{{port}}/api/v1/users/{{notExistingUsername}}/repositories
-Accept: application/xml
+Accept: application/json

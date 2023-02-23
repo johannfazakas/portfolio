@@ -1,0 +1,18 @@
+[
+  {
+    "name": "master",
+    "commit": {
+      "sha": "ed6d4ed094bda3decd3a7b7b8fd76f84845dd41f",
+      "url": "https://api.github.com/repos/test-user/repo/commits/ed6d4ed094bda3decd3a7b7b8fd76f84845dd41f"
+    },
+    "protected": false
+  },
+  {
+    "name": "feature-x",
+    "commit": {
+      "sha": "ed6d4ed094bda3decd3a7b7b8fd76f84845d1234",
+      "url": "https://api.github.com/repos/test-user/repo/commits/ed6d4ed094bda3decd3a7b7b8fd76f84845d1234"
+    },
+    "protected": false
+  }
+]
