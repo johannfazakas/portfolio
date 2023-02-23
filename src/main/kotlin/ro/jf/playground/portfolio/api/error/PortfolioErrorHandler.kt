@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.NotAcceptableStatusException
 import ro.jf.playground.portfolio.api.transfer.ErrorTO
+import ro.jf.playground.portfolio.domain.error.UserNotFoundException
 
 private const val REQUESTED_MEDIA_TYPE_NOT_SUPPORTED_MESSAGE = "Requested media type is not supported."
 private const val INTERNAL_SERVER_ERROR_MESSAGE = "Internal server error."
@@ -16,6 +17,19 @@ private val logger = KotlinLogging.logger { }
 
 @ControllerAdvice
 class PortfolioErrorHandler {
+
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handle(exception: UserNotFoundException): ResponseEntity<ErrorTO> {
+        logger.warn("User ${exception.username} could not be found.", exception)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(
+                ErrorTO(
+                    status = HttpStatus.NOT_FOUND.value(),
+                    message = exception.message
+                )
+            )
+    }
 
     @ExceptionHandler(NotAcceptableStatusException::class)
     fun handle(exception: NotAcceptableStatusException): ResponseEntity<ErrorTO> {

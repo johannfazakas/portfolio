@@ -2,6 +2,7 @@ package ro.jf.playground.portfolio.domain.service
 
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
+import ro.jf.playground.portfolio.domain.error.UserNotFoundException
 import ro.jf.playground.portfolio.domain.model.Branch
 import ro.jf.playground.portfolio.domain.model.Commit
 import ro.jf.playground.portfolio.domain.model.Owner
@@ -34,5 +35,7 @@ class UserRepositoryService {
     )
 
     fun getUserRepositories(username: String): Flux<RepositoryWithBranches> =
-        usersMap[username]?.let { Flux.just(*it.toTypedArray()) } ?: Flux.error(RuntimeException(username))
+        usersMap[username]
+            ?.let { Flux.just(*it.toTypedArray()) }
+            ?: Flux.error(UserNotFoundException(username))
 }

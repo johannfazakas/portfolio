@@ -39,7 +39,7 @@ class UserApiIntegrationTest {
     }
 
     @Test
-    fun `should return error when getting user repositories and requesting xml response`() {
+    fun `should return not acceptable error when getting user repositories and requesting xml response`() {
         val username = "test-user"
 
         val exchange = webClient.get()
@@ -53,6 +53,24 @@ class UserApiIntegrationTest {
             .value {
                 assertThat(it.status).isEqualTo(406)
                 assertThat(it.message).isNotEmpty()
+            }
+    }
+
+    @Test
+    fun `should return not found error when getting repositories for not existing username`() {
+        val username = "i-do-not-exist"
+
+        val exchange = webClient.get()
+            .uri("/api/v1/users/$username/repositories")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+
+        exchange
+            .expectStatus().isNotFound
+            .expectBody(ErrorTO::class.java)
+            .value {
+                assertThat(it.status).isEqualTo(404)
+                assertThat(it.message).contains(username)
             }
     }
 }
