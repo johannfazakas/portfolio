@@ -17,8 +17,8 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 import ro.jf.playground.portfolio.api.transfer.ErrorTO
 import ro.jf.playground.portfolio.api.transfer.RepositoriesTO
-import ro.jf.playground.portfolio.utils.givenMockResponseOnGetBranches
-import ro.jf.playground.portfolio.utils.givenMockResponseOnGetRepositories
+import ro.jf.playground.portfolio.utils.givenMockBranches
+import ro.jf.playground.portfolio.utils.givenMockRepositories
 import ro.jf.playground.portfolio.utils.givenNotFoundUserOnGetRepositories
 
 
@@ -50,13 +50,13 @@ class UserApiIntegrationTest(
     }
 
     @Test
-    fun `should return user repositories when getting user repositoriess`() {
+    fun `should return user repositories when getting user repositories`() {
         val username = "test-user"
         val repositoryName1 = "repo-1"
         val repositoryName2 = "repo-2"
-        wireMockServer.givenMockResponseOnGetRepositories(username)
-        wireMockServer.givenMockResponseOnGetBranches(username, repositoryName1)
-        wireMockServer.givenMockResponseOnGetBranches(username, repositoryName2)
+        wireMockServer.givenMockRepositories(username)
+        wireMockServer.givenMockBranches(username, repositoryName1)
+        wireMockServer.givenMockBranches(username, repositoryName2)
 
         val exchange = webClient.get()
             .uri("/api/v1/users/$username/repositories")

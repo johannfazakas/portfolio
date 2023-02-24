@@ -9,3 +9,7 @@ Accept: application/xml
 ### Get not existing user repositories
 GET {{host}}:{{port}}/api/v1/users/{{notExistingUsername}}/repositories
 Accept: application/json
+
+### Get user repositories for a user with a lot of repositories to force pagination
+GET {{host}}:{{port}}/api/v1/users/{{userWithManyRepos}}/repositories
+Accept: application/json

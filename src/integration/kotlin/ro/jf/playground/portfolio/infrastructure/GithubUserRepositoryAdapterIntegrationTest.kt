@@ -15,9 +15,11 @@ import org.springframework.test.context.ActiveProfiles
 import reactor.test.StepVerifier
 import ro.jf.playground.portfolio.domain.error.UserNotFoundException
 import ro.jf.playground.portfolio.infrastructure.github.GithubUserRepositoryAdapter
-import ro.jf.playground.portfolio.utils.givenMockResponseOnGetBranches
-import ro.jf.playground.portfolio.utils.givenMockResponseOnGetRepositories
+import ro.jf.playground.portfolio.utils.givenMockBranches
+import ro.jf.playground.portfolio.utils.givenMockRepositories
 import ro.jf.playground.portfolio.utils.givenNotFoundUserOnGetRepositories
+import ro.jf.playground.portfolio.utils.givenRandomPagedBranches
+import ro.jf.playground.portfolio.utils.givenRandomPagedRepositories
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("integration")
@@ -50,7 +52,7 @@ class GithubUserRepositoryAdapterIntegrationTest(
     @Test
     fun `should return repositories when getting user repositories`() {
         val username = "test-user"
-        wireMockServer.givenMockResponseOnGetRepositories(username)
+        wireMockServer.givenMockRepositories(username)
 
         val response = githubUserRepositoryAdapter.getUserRepositories(username)
 
@@ -75,6 +77,21 @@ class GithubUserRepositoryAdapterIntegrationTest(
     }
 
     @Test
+    fun `should retrieve repository pages when getting user repositories`() {
+        val username = "test-user"
+        wireMockServer.givenRandomPagedRepositories(username, 1, 30, 30)
+        wireMockServer.givenRandomPagedRepositories(username, 2, 30, 30)
+        wireMockServer.givenRandomPagedRepositories(username, 3, 30, 15)
+
+        val response = githubUserRepositoryAdapter.getUserRepositories(username)
+
+        response
+            .`as`(StepVerifier::create)
+            .expectNextCount(30 + 30 + 15)
+            .verifyComplete()
+    }
+
+    @Test
     fun `should return not found when getting not existing user repositories`() {
         val username = "not-found-user"
         wireMockServer.givenNotFoundUserOnGetRepositories(username)
@@ -90,7 +107,7 @@ class GithubUserRepositoryAdapterIntegrationTest(
     fun `should return branches when getting user repository branches`() {
         val username = "test-user"
         val repositoryName = "repo-1"
-        wireMockServer.givenMockResponseOnGetBranches(username, repositoryName)
+        wireMockServer.givenMockBranches(username, repositoryName)
 
         val response = githubUserRepositoryAdapter.getUserRepositoryBranches(username, repositoryName)
 
@@ -104,6 +121,21 @@ class GithubUserRepositoryAdapterIntegrationTest(
                 assertThat(it.name).isEqualTo("feature-x")
                 assertThat(it.commit.sha).isNotEmpty()
             }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `should retrieve branch pages when getting user repository branches`() {
+        val username = "test-user"
+        val repositoryName = "test-repo"
+        wireMockServer.givenRandomPagedBranches(username, repositoryName, 1, 30, 30)
+        wireMockServer.givenRandomPagedBranches(username, repositoryName, 2, 30, 7)
+
+        val response = githubUserRepositoryAdapter.getUserRepositoryBranches(username, repositoryName)
+
+        response
+            .`as`(StepVerifier::create)
+            .expectNextCount(30 + 7)
             .verifyComplete()
     }
 }
