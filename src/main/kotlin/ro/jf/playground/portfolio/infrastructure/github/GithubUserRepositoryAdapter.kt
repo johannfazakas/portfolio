@@ -48,6 +48,7 @@ class GithubUserRepositoryAdapter(
                 .retrieve()
                 .onStatus({ it.isError }) {
                     it.handleError { code: HttpStatusCode, response ->
+                        logger.warn("Error on get repositories from GitHub API with status $code, response $response")
                         when (code) {
                             HttpStatus.NOT_FOUND -> UserNotFoundException(username)
                             else -> ProviderException(response)
@@ -69,7 +70,12 @@ class GithubUserRepositoryAdapter(
             githubApiWebClient.get()
                 .uri(uri)
                 .retrieve()
-                .onStatus({ it.isError }) { it.handleError { _, response -> ProviderException(response) } }
+                .onStatus({ it.isError }) {
+                    it.handleError { code, response ->
+                        logger.warn("Error on get repositories from GitHub API with status $code, response $response")
+                        ProviderException(response)
+                    }
+                }
                 .bodyToFlux(GithubBranch::class.java)
                 .map(GithubBranch::toModel)
         }

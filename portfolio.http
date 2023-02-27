@@ -11,5 +11,6 @@ GET {{host}}:{{port}}/api/v1/users/{{notExistingUsername}}/repositories
 Accept: application/json
 
 ### Get user repositories for a user with a lot of repositories to force pagination
+# !! This could easily lead to a failure due to GitHub API rate limiting to 60 calls per hour for unauthenticated calls.
 GET {{host}}:{{port}}/api/v1/users/{{userWithManyRepos}}/repositories
 Accept: application/json
